@@ -4,6 +4,7 @@ import Rotas from './routes/Rotas';
 import HomePage from './views/Home';
 import 'semantic-ui-css/semantic.min.css'
 
+
 const App = () => {
 	return (
 		<Router>
