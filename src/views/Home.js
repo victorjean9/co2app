@@ -2,9 +2,10 @@ import React, { useEffect, useState } from 'react';
 import CanvasJSReact from '../assets/canvasjs.react';
 import AxiosClient from '../services/AxiosClient';
 import Links from '../routes/Links';
-import { Segment, Container, Header, Icon, Divider, Dimmer, Loader, Form, Button } from 'semantic-ui-react';
+import { Segment, Container, Header, Icon, Divider, Form, Button, Statistic } from 'semantic-ui-react';
 
 import fundo from '../assets/fundo.jpg';
+import RiscoService from '../services/RiscoService';
 
 var CanvasJSChart = CanvasJSReact.CanvasJSChart;
 
@@ -45,12 +46,14 @@ const GraficoSegment = (props) => {
                 let idSensor = result.data[i].idSensor;
                 let risco = result.data[i].risco;
                 let riscoSemMascara = result.data[i].riscoSemMascara;
+                let riscoComPff2 = result.data[i].riscoComPff2;
 
                 medicao.push(co2);
                 medicao.push(timestamp);
                 medicao.push(idSensor);
                 medicao.push(risco);
                 medicao.push(riscoSemMascara);
+                medicao.push(riscoComPff2);
 
                 medicoesArray.push(medicao);
             }
@@ -83,6 +86,12 @@ const GraficoSegment = (props) => {
             theme: "light2", // "light1", "light2", "dark1", "dark2"
             animationEnabled: true,
             zoomEnabled: true,
+            axisY: {
+				title: "CO2"
+			},
+            axisX: {
+				title: "Tempo"
+			},
             data: [{
                 type: "area",
                 xValueType: "dateTime",
@@ -94,19 +103,15 @@ const GraficoSegment = (props) => {
     }
 
     return (
-        <Segment>
-            <Dimmer active={props.loading} inverted>
-                <Loader inverted>Carregando</Loader>
-            </Dimmer>
-            <div>
-                <Header as="h2" >
-                    <Icon name="area graph" />
-                    <Header.Content>Gráfico</Header.Content>
+        <div>
+            <Divider horizontal>
+                <Header as='h4'>
+                    <Icon name='area graph' />
+                    Gráfico
                 </Header>
-                <Divider />
-                <CanvasJSChart options={options}/>
-            </div>
-        </Segment>
+            </Divider>
+            <CanvasJSChart options={options}/>
+        </div>
     );
 }
 
@@ -125,19 +130,22 @@ const GraficoRiscoSegment = (props) => {
 
     const carregaGrafico = () => {
         let dataPointsComMascara = [];
+        let dataPointsComPff2 = [];
         let dataPointsSemMascara = [];
 
         for(let i = 0; i < props.medicoes.length; i++) {
             let risco = props.medicoes[i][3];
             let riscoSemMascara = props.medicoes[i][4];
+            let riscoComPff2 = props.medicoes[i][5];
             let timestamp = props.medicoes[i][1];
 
             let dateRaw = new Date(timestamp);
 
             let date = dateRaw.getTime();
 
-            dataPointsComMascara.push({x: date, y: parseFloat(risco)});
-            dataPointsSemMascara.push({x: date, y: parseFloat(riscoSemMascara)});
+            dataPointsComMascara.push({x: date, y: parseFloat(risco.toFixed(1))});
+            dataPointsComPff2.push({x: date, y: parseFloat(riscoComPff2.toFixed(1))});
+            dataPointsSemMascara.push({x: date, y: parseFloat(riscoSemMascara.toFixed(1))});
         }
 
         // console.log(dataPoints);
@@ -146,6 +154,13 @@ const GraficoRiscoSegment = (props) => {
             theme: "light2", // "light1", "light2", "dark1", "dark2"
             animationEnabled: true,
             zoomEnabled: true,
+            axisY: {
+				title: "Probabilidade",
+				suffix: "%"
+			},
+            axisX: {
+				title: "Tempo"
+			},
             data: [{
                 name: "Sem máscara",
                 showInLegend: true,
@@ -154,12 +169,19 @@ const GraficoRiscoSegment = (props) => {
                 xValueType: "dateTime",
                 dataPoints: dataPointsSemMascara
             }, {
-                name: "Com máscara",
+                name: "Com máscara de pano",
                 showInLegend: true,
                 color: "green",
                 type: "area",
                 xValueType: "dateTime",
                 dataPoints: dataPointsComMascara
+            }, {
+                name: "Com máscara PFF2",
+                showInLegend: true,
+                color: "blue",
+                type: "area",
+                xValueType: "dateTime",
+                dataPoints: dataPointsComPff2
             }]
         });
 
@@ -167,25 +189,21 @@ const GraficoRiscoSegment = (props) => {
     }
 
     return (
-        <Segment>
-            <Dimmer active={props.loading} inverted>
-                <Loader inverted>Carregando</Loader>
-            </Dimmer>
-            <div>
-                <Header as="h2" >
-                    <Icon name="area graph" />
-                    <Header.Content>Gráfico do Risco</Header.Content>
+        <div>
+            <Divider horizontal>
+                <Header as='h4'>
+                    <Icon name='area graph' />
+                    Gráfico
                 </Header>
-                <Divider />
-                <CanvasJSChart options={options}/>
-            </div>
-        </Segment>
+            </Divider>
+            <CanvasJSChart options={options}/>
+        </div>
     );
 }
 
 const FiltrosSegment = (props) => {
 
-    let [sensor, setSensor] = useState('610102bde69bd84020a30f52');
+    
     let [dia, setDia] = useState(0);
     let [ateDia, setAteDia] = useState(0);
     let [mes, setMes] = useState(0);
@@ -220,7 +238,7 @@ const FiltrosSegment = (props) => {
 
         if(mes === 0){
             let filtro = {
-                idSensor: sensor
+                idSensor: props.sensor
             };
 
             props.setFiltro(filtro);
@@ -243,7 +261,7 @@ const FiltrosSegment = (props) => {
             }
             
             let filtro = {
-                idSensor: sensor,
+                idSensor: props.sensor,
                 from: diaFormatado,
                 to: ateDiaFormatado
             };
@@ -265,8 +283,8 @@ const FiltrosSegment = (props) => {
                         fluid
                         label='Sensor:'
                         options={optionsSensores}
-                        value={sensor}
-                        onChange={(e, {value}) => setSensor(value)} 
+                        value={props.sensor}
+                        onChange={(e, {value}) => props.setSensor(value)} 
                     />
                     <Form.Select
                         fluid
@@ -292,18 +310,18 @@ const FiltrosSegment = (props) => {
                 </Form.Group>
                 <Button content='Filtrar' icon='filter' labelPosition='right' onClick={() => enviaFiltro()} loading={props.loading}/>
             </Form>
-                
+            <GraficoSegment 
+                loading={props.loading} setLoading={props.setLoading} 
+
+                setMedicoes={props.setMedicoes}
+                filtro={props.filtro}
+            />
         </Segment>
     );
 }
 
 const RiscoSegment = (props) => {
-
-    let [quanta, setQuanta] = useState(25);
     // let [taxaCoIn, setTaxaCoIn] = useState("");
-    let [numeroInfectados, setNumeroInfectados] = useState(1);
-    let [tempo, setTempo] = useState(2);
-    let [ocupantes, setOcupantes] = useState(20);
 
     const recalculaRiscoDados = (medicoes, numeroInfectados = 1, tempo = 2, ocupantes = 20, quanta = 25) => {
         // props.setLoading(true);
@@ -311,35 +329,14 @@ const RiscoSegment = (props) => {
         let medicoesArray = [];
 
         medicoes.forEach(registro => {
-            registro[3] = calculaRisco(registro[0], numeroInfectados, tempo, ocupantes, quanta);
-            registro[4] = calculaRisco(registro[0], numeroInfectados, tempo, ocupantes, quanta, false);
+            registro[3] = RiscoService.calculaRisco(registro[0], numeroInfectados, tempo, ocupantes, quanta);
+            registro[4] = RiscoService.calculaRisco(registro[0], numeroInfectados, tempo, ocupantes, quanta, false);
+            registro[5] = RiscoService.calculaRisco(registro[0], numeroInfectados, tempo, ocupantes, quanta, true, 0.95);
             medicoesArray.push(registro);
         });
 
         props.setMedicoes(medicoesArray);
         // props.setLoading(false);
-    }
-
-    //formula da probabilidade derivada de Wells–Riley (RUDNICK; MILTON, 2003),
-    const calculaRisco = (taxaCoIn, numeroInfectados, tempo, ocupantes, quanta = 25, temMascara = true) => {
-        //passar pra configuração 
-        const taxaCoEx = 380;
-        const coExalada = 15000;
-        const porcOcupantesMask = 1; //todos
-        const porcEficienciaMask = 0.5; //mascara de pano
-
-        let quantaExaComMask = temMascara ? getQuantaExaComMask(quanta, porcOcupantesMask, porcEficienciaMask) : quanta; 
-        
-        let arExaladoAmbiente = (taxaCoIn - taxaCoEx)/coExalada;
-        let probabilidade = 1 - Math.exp((-arExaladoAmbiente * numeroInfectados * quantaExaComMask * tempo)/ocupantes);
-        // let probabilidade = 1 - Math.exp((-arExaladoAmbiente * numeroInfectados * quanta * tempo)/ocupantes);
-        
-        return probabilidade*100;
-    }
-
-    //taxa de quantaapós vedação e filtração pela máscara (PENG; JIMENEZ, 2020),
-    const getQuantaExaComMask = (quanta, porcOcupantesMask, porcEficienciaMask) => {
-        return quanta * (1 - porcOcupantesMask * porcEficienciaMask);
     }
 
     return(
@@ -351,15 +348,97 @@ const RiscoSegment = (props) => {
             <Divider />
             <Form>
                 <Form.Group widths='equal'>
-                    <Form.Input fluid label='Quanta' value={quanta} onChange={(e, {value}) => setQuanta(value)} />
+                    <Form.Input fluid label='Quanta' value={props.quanta} onChange={(e, {value}) => props.setQuanta(value)} />
                     {/* <Form.Input fluid label='Taxa de CO2 interno' value={taxaCoIn} onChange={(e, {value}) => setTaxaCoIn(value)} /> */}
                     
-                    <Form.Input fluid label='Numero de infectados' value={numeroInfectados} onChange={(e, {value}) => setNumeroInfectados(value)} />
-                    <Form.Input fluid label='Tempo' value={tempo} onChange={(e, {value}) => setTempo(value)} />
-                    <Form.Input fluid label='Ocupantes' value={ocupantes} onChange={(e, {value}) => setOcupantes(value)} />
+                    <Form.Input fluid label='Numero de infectados' value={props.numeroInfectados} onChange={(e, {value}) => props.setNumeroInfectados(value)} />
+                    <Form.Input fluid label='Tempo' value={props.tempo} onChange={(e, {value}) => props.setTempo(value)} />
+                    <Form.Input fluid label='Ocupantes' value={props.ocupantes} onChange={(e, {value}) => props.setOcupantes(value)} />
                 </Form.Group>
-                <Button content='Calcular' icon='arrow right' labelPosition='right' onClick={() => recalculaRiscoDados(props.medicoes, numeroInfectados, tempo, ocupantes, quanta)} loading={props.loading}/>
+                <Button content='Calcular' icon='arrow right' labelPosition='right' onClick={() => recalculaRiscoDados(props.medicoes, props.numeroInfectados, props.tempo, props.ocupantes, props.quanta)} loading={props.loading}/>
             </Form>
+
+            <GraficoRiscoSegment 
+                loading={props.loading} setLoading={props.setLoading} 
+                
+                medicoes={props.medicoes}
+            />
+        </Segment>
+    );
+}
+
+const RiscoAoVivo = (props) => {
+
+    const filtroSemMascara = 0;
+    const filtroComMascara = 0.5;
+    const filtroComPFF2 = 0.95;
+
+    let [riscoSemMascara, setRiscoSemMascara] = useState(0);
+    let [riscoComMascara, setRiscoComMascara] = useState(0);
+    let [riscoComPFF2, setRiscoComPFF2] = useState(0);
+
+    let [intervalo, setIntervalo] = useState();
+    let [contInt, setContInt] = useState(0);
+
+    useEffect(() => {
+        if(props.idSensor !== 0){
+            if(contInt !== 0) {
+                clearInterval(intervalo);
+            }
+
+            setContInt(contInt + 1);
+
+            carregaRiscos();
+        }
+
+    }, [props.idSensor, props.numeroInfectados, props.tempo, props.ocupantes, props.quanta]);
+    
+    const carregaRiscos = () => {
+        AxiosClient.get(
+            Links.medicao + props.idSensor,
+            {
+                headers: {
+                    "Content-type": "Application/json",
+                    "Authorization": '60e142711eaf3f50dca37bad'
+                }
+            }
+        )
+        .then(result => {
+
+            let riscoSM = RiscoService.calculaRisco(result.data.medicao, props.numeroInfectados, props.tempo, props.ocupantes, props.quanta, false, filtroSemMascara);
+            let riscoCM = RiscoService.calculaRisco(result.data.medicao, props.numeroInfectados, props.tempo, props.ocupantes, props.quanta, true, filtroComMascara);
+            let riscoCPff2 = RiscoService.calculaRisco(result.data.medicao, props.numeroInfectados, props.tempo, props.ocupantes, props.quanta, true, filtroComPFF2);
+
+            setRiscoSemMascara(Math.round(riscoSM));
+            setRiscoComMascara(Math.round(riscoCM));
+            setRiscoComPFF2(Math.round(riscoCPff2));
+
+            let interval = setInterval(carregaRiscos, 60000); 
+            setIntervalo(interval);
+        });
+    }
+
+    return(
+        <Segment>
+            <Header as="h2">
+                <Icon name="time" />
+                <Header.Content>Risco Ao-Vivo (Sensor: {props.idSensor})</Header.Content>
+            </Header>
+            <Divider />
+            <Statistic.Group size="tiny" widths='three'>
+                <Statistic>
+                    <Statistic.Label>Risco sem máscara</Statistic.Label>
+                    <Statistic.Value>{riscoSemMascara}%</Statistic.Value>
+                </Statistic>
+                <Statistic>
+                    <Statistic.Label>Risco com máscara de pano</Statistic.Label>
+                    <Statistic.Value>{riscoComMascara}%</Statistic.Value>
+                </Statistic>
+                <Statistic>
+                    <Statistic.Label>Risco com máscara Pff2</Statistic.Label>
+                    <Statistic.Value>{riscoComPFF2}%</Statistic.Value>
+                </Statistic>
+            </Statistic.Group>
         </Segment>
     );
 }
@@ -368,8 +447,15 @@ const HomePage = (props) => {
     
     let [loading, setLoading] = useState(false);
 
+    let [sensor, setSensor] = useState('610102bde69bd84020a30f52');
+
     let [filtro, setFiltro] = useState();
     let [medicoes, setMedicoes] = useState([]);
+
+    let [quanta, setQuanta] = useState(25);
+    let [numeroInfectados, setNumeroInfectados] = useState(1);
+    let [tempo, setTempo] = useState(2);
+    let [ocupantes, setOcupantes] = useState(20);
 
     return(
         <div style={{background: "url(" + fundo +")"}}>
@@ -380,28 +466,40 @@ const HomePage = (props) => {
                     <Header.Content>Medidor CO2</Header.Content> 
                 </Header>
                 <br/>
+                <RiscoAoVivo 
+                    loading={loading} setLoading={setLoading} 
+                    idSensor={sensor}
+
+                    quanta={quanta} setQuanta={setQuanta}
+                    numeroInfectados={numeroInfectados} setNumeroInfectados={setNumeroInfectados}
+                    tempo={tempo} setTempo={setTempo}
+                    ocupantes={ocupantes} setOcupantes={setOcupantes}
+                />
                 <FiltrosSegment 
                     loading={loading}
+                    setLoading={setLoading}
 
-                    setFiltro={setFiltro}
-                />
-                <GraficoSegment 
-                    loading={loading} setLoading={setLoading} 
+                    sensor={sensor}
+                    setSensor={setSensor}
 
-                    setMedicoes={setMedicoes}
                     filtro={filtro}
-                />
-                <GraficoRiscoSegment 
-                    loading={loading} setLoading={setLoading} 
+                    setFiltro={setFiltro}
                     
-                    medicoes={medicoes}
+                    setMedicoes={setMedicoes}
                 />
                 <RiscoSegment 
                     loading={loading} setLoading={setLoading} 
                     setMedicoes={setMedicoes}
                     medicoes={medicoes}
                     filtro={filtro}
+
+                    quanta={quanta} setQuanta={setQuanta}
+                    numeroInfectados={numeroInfectados} setNumeroInfectados={setNumeroInfectados}
+                    tempo={tempo} setTempo={setTempo}
+                    ocupantes={ocupantes} setOcupantes={setOcupantes}
+
                 />
+                
                 <br/>
             </Container>
         </div>
