@@ -87,7 +87,7 @@ const GraficoSegment = (props) => {
             animationEnabled: true,
             zoomEnabled: true,
             axisY: {
-				title: "CO2"
+				title: "CO₂"
 			},
             axisX: {
 				title: "Tempo"
@@ -106,7 +106,7 @@ const GraficoSegment = (props) => {
         <Segment loading={props.loading}>
             <Header as='h4'>
                 <Icon name='area graph' />
-                Gráfico do CO2
+                Gráfico do CO₂
             </Header>
             <Divider />
             <CanvasJSChart options={options}/>
