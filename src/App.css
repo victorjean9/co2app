@@ -12,7 +12,6 @@
     animation: App-logo-spin infinite 20s linear;
   }
 }
-
 .App-header {
   background-color: #282c34;
   min-height: 100vh;
@@ -29,7 +28,7 @@
 }
 
 .icone_dark {
-  box-shadow: 0 0 0 0.1em rgb(255 255 255) inset !important;
+  box-shadow: 0 0 0 0.1em white inset !important;
 }
 
 @keyframes App-logo-spin {
@@ -40,3 +39,16 @@
     transform: rotate(360deg);
   }
 }
+#Menu-principal {
+  width: 100%;
+  height: 75px;
+  position: fixed;
+  z-index: 900;
+  background-color: white;
+}
+#Menu-principal-header {
+  padding-top: 20px !important;
+  padding-left: 20px !important;
+}
+
+/*# sourceMappingURL=App.css.map */

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import CanvasJSReact from '../assets/canvasjs.react';
 import AxiosClient from '../services/AxiosClient';
 import Links from '../routes/Links';
-import { Segment, Container, Header, Icon, Divider, Form, Button, Statistic } from 'semantic-ui-react';
+import { Segment, Container, Header, Icon, Divider, Form, Button, Statistic, Grid } from 'semantic-ui-react';
 
 import fundo from '../assets/fundo.jpg';
 import RiscoService from '../services/RiscoService';
@@ -103,15 +103,14 @@ const GraficoSegment = (props) => {
     }
 
     return (
-        <div>
-            <Divider horizontal>
-                <Header as='h4'>
-                    <Icon name='area graph' />
-                    Gráfico
-                </Header>
-            </Divider>
+        <Segment loading={props.loading}>
+            <Header as='h4'>
+                <Icon name='area graph' />
+                Gráfico do CO2
+            </Header>
+            <Divider />
             <CanvasJSChart options={options}/>
-        </div>
+        </Segment>
     );
 }
 
@@ -189,28 +188,27 @@ const GraficoRiscoSegment = (props) => {
     }
 
     return (
-        <div>
-            <Divider horizontal>
-                <Header as='h4'>
-                    <Icon name='area graph' />
-                    Gráfico
-                </Header>
-            </Divider>
+        <Segment loading={props.loading}>
+            <Header as='h4'>
+                <Icon name='area graph' />
+                Gráfico do Risco
+            </Header>
+            <Divider />
             <CanvasJSChart options={options}/>
-        </div>
+        </Segment>
     );
 }
 
 const FiltrosSegment = (props) => {
-
+    let [sensor, setSensor] = useState('610102bde69bd84020a30f52');
     
     let [dia, setDia] = useState(0);
     let [ateDia, setAteDia] = useState(0);
     let [mes, setMes] = useState(0);
 
     let optionsSensores = [
-        { key: '610102bde69bd84020a30f52', text: '610102bde69bd84020a30f52', value: '610102bde69bd84020a30f52' },
-        { key: '610597435877da09d494531c', text: '610597435877da09d494531c', value: '610597435877da09d494531c' }
+        { key: '610102bde69bd84020a30f52', text: 'Sensor Principal', value: '610102bde69bd84020a30f52' },
+        { key: '610597435877da09d494531c', text: 'Sensor Secundário', value: '610597435877da09d494531c' }
     ];
 
     let optionsMeses = [
@@ -235,10 +233,11 @@ const FiltrosSegment = (props) => {
     }, [])
 
     const enviaFiltro = () => {
+        props.setSensor(sensor);
 
         if(mes === 0){
             let filtro = {
-                idSensor: props.sensor
+                idSensor: sensor
             };
 
             props.setFiltro(filtro);
@@ -261,7 +260,7 @@ const FiltrosSegment = (props) => {
             }
             
             let filtro = {
-                idSensor: props.sensor,
+                idSensor: sensor,
                 from: diaFormatado,
                 to: ateDiaFormatado
             };
@@ -271,57 +270,61 @@ const FiltrosSegment = (props) => {
     }
 
     return(
-        <Segment>
-            <Header as="h2">
+        <>
+            <Header as="h4">
                 <Icon name="filter" />
                 <Header.Content>Filtrar medições</Header.Content>
             </Header>
-            <Divider />
             <Form>
-                <Form.Group widths='equal'>
+                <Form.Select
+                    fluid
+                    label='Sensor:'
+                    options={optionsSensores}
+                    value={sensor}
+                    onChange={(e, {value}) => setSensor(value)} 
+                />
+                <Form.Select
+                    fluid
+                    label='Do dia:'
+                    options={optionsDias}
+                    value={dia}
+                    onChange={(e, {value}) => setDia(value)} 
+                />
                     <Form.Select
-                        fluid
-                        label='Sensor:'
-                        options={optionsSensores}
-                        value={props.sensor}
-                        onChange={(e, {value}) => props.setSensor(value)} 
-                    />
-                    <Form.Select
-                        fluid
-                        label='Do dia:'
-                        options={optionsDias}
-                        value={dia}
-                        onChange={(e, {value}) => setDia(value)} 
-                    />
-                        <Form.Select
-                        fluid
-                        label='Até o dia:'
-                        options={optionsDias}
-                        value={ateDia}
-                        onChange={(e, {value}) => setAteDia(value)} 
-                    />
-                    <Form.Select
-                        fluid
-                        label='Mês:'
-                        options={optionsMeses}
-                        value={mes}
-                        onChange={(e, {value}) => setMes(value)} 
-                    />
-                </Form.Group>
+                    fluid
+                    label='Até o dia:'
+                    options={optionsDias}
+                    value={ateDia}
+                    onChange={(e, {value}) => setAteDia(value)} 
+                />
+                <Form.Select
+                    fluid
+                    label='Mês:'
+                    options={optionsMeses}
+                    value={mes}
+                    onChange={(e, {value}) => setMes(value)} 
+                />
                 <Button content='Filtrar' icon='filter' labelPosition='right' onClick={() => enviaFiltro()} loading={props.loading}/>
             </Form>
-            <GraficoSegment 
-                loading={props.loading} setLoading={props.setLoading} 
-
-                setMedicoes={props.setMedicoes}
-                filtro={props.filtro}
-            />
-        </Segment>
+        </>
     );
 }
 
 const RiscoSegment = (props) => {
     // let [taxaCoIn, setTaxaCoIn] = useState("");
+    let [quanta, setQuanta] = useState(25);
+    let [numeroInfectados, setNumeroInfectados] = useState(1);
+    let [tempo, setTempo] = useState(2);
+    let [ocupantes, setOcupantes] = useState(20);
+
+    const calculaRisco = (medicoes) => {
+        props.setQuanta(quanta);
+        props.setNumeroInfectados(numeroInfectados);
+        props.setTempo(tempo);
+        props.setOcupantes(ocupantes);
+
+        recalculaRiscoDados(medicoes, numeroInfectados, tempo, ocupantes, quanta);
+    }
 
     const recalculaRiscoDados = (medicoes, numeroInfectados = 1, tempo = 2, ocupantes = 20, quanta = 25) => {
         // props.setLoading(true);
@@ -340,30 +343,22 @@ const RiscoSegment = (props) => {
     }
 
     return(
-        <Segment>
-            <Header as="h2">
+        <>
+            <Divider />
+            <Header as="h4">
                 <Icon name="edit" />
                 <Header.Content>Calcular Risco</Header.Content>
             </Header>
-            <Divider />
             <Form>
-                <Form.Group widths='equal'>
-                    <Form.Input fluid label='Quanta' value={props.quanta} onChange={(e, {value}) => props.setQuanta(value)} />
-                    {/* <Form.Input fluid label='Taxa de CO2 interno' value={taxaCoIn} onChange={(e, {value}) => setTaxaCoIn(value)} /> */}
-                    
-                    <Form.Input fluid label='Numero de infectados' value={props.numeroInfectados} onChange={(e, {value}) => props.setNumeroInfectados(value)} />
-                    <Form.Input fluid label='Tempo' value={props.tempo} onChange={(e, {value}) => props.setTempo(value)} />
-                    <Form.Input fluid label='Ocupantes' value={props.ocupantes} onChange={(e, {value}) => props.setOcupantes(value)} />
-                </Form.Group>
-                <Button content='Calcular' icon='arrow right' labelPosition='right' onClick={() => recalculaRiscoDados(props.medicoes, props.numeroInfectados, props.tempo, props.ocupantes, props.quanta)} loading={props.loading}/>
-            </Form>
-
-            <GraficoRiscoSegment 
-                loading={props.loading} setLoading={props.setLoading} 
+                <Form.Input fluid label='Quanta' value={quanta} onChange={(e, {value}) => setQuanta(value)} />
+                {/* <Form.Input fluid label='Taxa de CO2 interno' value={taxaCoIn} onChange={(e, {value}) => setTaxaCoIn(value)} /> */}
                 
-                medicoes={props.medicoes}
-            />
-        </Segment>
+                <Form.Input fluid label='Numero de infectados' value={numeroInfectados} onChange={(e, {value}) => setNumeroInfectados(value)} />
+                <Form.Input fluid label='Tempo' value={tempo} onChange={(e, {value}) => setTempo(value)} />
+                <Form.Input fluid label='Ocupantes' value={ocupantes} onChange={(e, {value}) => setOcupantes(value)} />
+                <Button content='Calcular' icon='arrow right' labelPosition='right' onClick={() => calculaRisco(props.medicoes)} loading={props.loading}/>
+            </Form>
+        </>
     );
 }
 
@@ -390,7 +385,7 @@ const RiscoAoVivo = (props) => {
 
             carregaRiscos();
         }
-
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [props.idSensor, props.numeroInfectados, props.tempo, props.ocupantes, props.quanta]);
     
     const carregaRiscos = () => {
@@ -419,26 +414,35 @@ const RiscoAoVivo = (props) => {
     }
 
     return(
-        <Segment>
-            <Header as="h2">
+        <Segment loading={props.loading}>
+            <Header as="h4">
                 <Icon name="time" />
-                <Header.Content>Risco Ao-Vivo (Sensor: {props.idSensor})</Header.Content>
+                <Header.Content>Risco Ao-Vivo</Header.Content>
             </Header>
             <Divider />
             <Statistic.Group size="tiny" widths='three'>
                 <Statistic>
                     <Statistic.Label>Risco sem máscara</Statistic.Label>
-                    <Statistic.Value>{riscoSemMascara}%</Statistic.Value>
+                    <Statistic.Value>{riscoSemMascara ? riscoSemMascara + "%" : "-"}</Statistic.Value>
                 </Statistic>
                 <Statistic>
                     <Statistic.Label>Risco com máscara de pano</Statistic.Label>
-                    <Statistic.Value>{riscoComMascara}%</Statistic.Value>
+                    <Statistic.Value>{riscoComMascara ? riscoComMascara + "%" : "-"}</Statistic.Value>
                 </Statistic>
                 <Statistic>
                     <Statistic.Label>Risco com máscara Pff2</Statistic.Label>
-                    <Statistic.Value>{riscoComPFF2}%</Statistic.Value>
+                    <Statistic.Value>{riscoComPFF2 ? riscoComPFF2 + "%" : "-"}</Statistic.Value>
                 </Statistic>
             </Statistic.Group>
+        </Segment>
+    );
+}
+
+const MenuVertical = (props) => {
+
+    return(
+        <Segment>
+            {props.children}
         </Segment>
     );
 }
@@ -458,50 +462,59 @@ const HomePage = (props) => {
     let [ocupantes, setOcupantes] = useState(20);
 
     return(
-        <div style={{background: "url(" + fundo +")"}}>
-            <Container>
-                <br/>
-                <Header as="h1" icon textAlign='center' inverted>
-                    <Icon className="icone_dark" name="thermometer half" circular/>
-                    <Header.Content>Medidor CO2</Header.Content> 
-                </Header>
-                <br/>
-                <RiscoAoVivo 
-                    loading={loading} setLoading={setLoading} 
-                    idSensor={sensor}
+        <div style={{background: "url(" + fundo +")", backgroundSize: "100%"}}>
+            <br/>
+            <br/>
+            <br/>
+            <br/>
+            <br/>
+            <Grid columns='equal' style={{margin: "0px 15px"}}>
+                <Grid.Column>
+                    <MenuVertical>
+                        <FiltrosSegment 
+                            loading={loading} setLoading={setLoading} 
+                            sensor={sensor}
+                            setSensor={setSensor}
 
-                    quanta={quanta} setQuanta={setQuanta}
-                    numeroInfectados={numeroInfectados} setNumeroInfectados={setNumeroInfectados}
-                    tempo={tempo} setTempo={setTempo}
-                    ocupantes={ocupantes} setOcupantes={setOcupantes}
-                />
-                <FiltrosSegment 
-                    loading={loading}
-                    setLoading={setLoading}
+                            filtro={filtro}
+                            setFiltro={setFiltro}
+                        />
+                        <RiscoSegment 
+                            loading={loading} setLoading={setLoading} 
+                            setMedicoes={setMedicoes}
+                            medicoes={medicoes}
+                            filtro={filtro}
 
-                    sensor={sensor}
-                    setSensor={setSensor}
+                            quanta={quanta} setQuanta={setQuanta}
+                            numeroInfectados={numeroInfectados} setNumeroInfectados={setNumeroInfectados}
+                            tempo={tempo} setTempo={setTempo}
+                            ocupantes={ocupantes} setOcupantes={setOcupantes}
 
-                    filtro={filtro}
-                    setFiltro={setFiltro}
-                    
-                    setMedicoes={setMedicoes}
-                />
-                <RiscoSegment 
-                    loading={loading} setLoading={setLoading} 
-                    setMedicoes={setMedicoes}
-                    medicoes={medicoes}
-                    filtro={filtro}
+                        />
+                    </MenuVertical>
+                </Grid.Column>
+                <Grid.Column width={13}>
+                    <RiscoAoVivo 
+                        loading={loading} setLoading={setLoading} 
+                        idSensor={sensor}
 
-                    quanta={quanta} setQuanta={setQuanta}
-                    numeroInfectados={numeroInfectados} setNumeroInfectados={setNumeroInfectados}
-                    tempo={tempo} setTempo={setTempo}
-                    ocupantes={ocupantes} setOcupantes={setOcupantes}
-
-                />
-                
-                <br/>
-            </Container>
+                        quanta={quanta} setQuanta={setQuanta}
+                        numeroInfectados={numeroInfectados} setNumeroInfectados={setNumeroInfectados}
+                        tempo={tempo} setTempo={setTempo}
+                        ocupantes={ocupantes} setOcupantes={setOcupantes}
+                    />
+                    <GraficoRiscoSegment 
+                        loading={loading} 
+                        setLoading={setLoading} 
+                        medicoes={medicoes}
+                    />
+                    <GraficoSegment 
+                        loading={loading} setLoading={setLoading}
+                        setMedicoes={setMedicoes}
+                        filtro={filtro}
+                    />
+                </Grid.Column>
+            </Grid>
         </div>
     );
 }
