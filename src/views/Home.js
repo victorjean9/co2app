@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import CanvasJSReact from '../assets/canvasjs.react';
 import AxiosClient from '../services/AxiosClient';
 import Links from '../routes/Links';
-import { Segment, Container, Header, Icon, Divider, Form, Button, Statistic, Grid } from 'semantic-ui-react';
+import { Segment, Header, Icon, Divider, Form, Button, Statistic, Grid } from 'semantic-ui-react';
 
 import fundo from '../assets/fundo.jpg';
 import RiscoService from '../services/RiscoService';
