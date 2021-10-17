@@ -3,8 +3,12 @@ import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 import Rotas from './routes/Rotas';
 import HomePage from './views/Home';
 import 'semantic-ui-css/semantic.min.css';
-import { Container, Header, Icon } from 'semantic-ui-react';
+import { Header, Icon } from 'semantic-ui-react';
+import { createBrowserHistory } from 'history';
 
+export const history = createBrowserHistory({
+    basename: process.env.PUBLIC_URL
+});
 
 const MenuPrincipal = () => {
 	return (
