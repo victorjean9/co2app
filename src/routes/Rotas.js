@@ -1,6 +1,6 @@
 class Rotas {
     constructor() {
-        this.base = '/';
+        this.base = 'https://www.dcc.ufrrj.br/co2-gui/';
     }
 }
 

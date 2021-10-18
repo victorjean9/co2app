@@ -4,11 +4,6 @@ import Rotas from './routes/Rotas';
 import HomePage from './views/Home';
 import 'semantic-ui-css/semantic.min.css';
 import { Header, Icon } from 'semantic-ui-react';
-import { createBrowserHistory } from 'history';
-
-export const history = createBrowserHistory({
-    basename: process.env.PUBLIC_URL
-});
 
 const MenuPrincipal = () => {
 	return (
