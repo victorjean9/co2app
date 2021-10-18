@@ -20,11 +20,7 @@ const App = () => {
 	return (
 		<>
 			<MenuPrincipal />
-			<Router>
-				<Switch>
-					<Route path={Rotas.base} exact component={HomePage}/>	
-				</Switch>
-			</Router>
+			<HomePage />
 		</>
 	);
 }
