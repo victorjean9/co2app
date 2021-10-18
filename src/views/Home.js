@@ -472,7 +472,7 @@ const HomePage = (props) => {
             <br/>
             <br/>
             <br/>
-            <Grid columns='equal' style={{margin: "0px 15px"}}>
+            <Grid columns='equal' style={{margin: "0px 15px"}} stackable>
                 <Grid.Column>
                     <MenuVertical>
                         <FiltrosSegment 
