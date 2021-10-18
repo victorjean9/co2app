@@ -215,7 +215,11 @@ const FiltrosSegment = (props) => {
         { key: 0, text: '---', value: 0 },
         { key: 6, text: 'Junho', value: 6 },
         { key: 7, text: 'Julho', value: 7 },
-        { key: 8, text: 'Agosto', value: 8 }
+        { key: 8, text: 'Agosto', value: 8 },
+        { key: 9, text: 'Setembro', value: 9 },
+        { key: 10, text: 'Outubro', value: 10 },
+        { key: 11, text: 'Novembro', value: 11 },
+        { key: 12, text: 'Dezembro', value: 12 }
     ];
 
     let [optionsDias, setOptionsDias] = useState([]);

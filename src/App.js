@@ -1,6 +1,4 @@
 import './App.css';
-import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
-import Rotas from './routes/Rotas';
 import HomePage from './views/Home';
 import 'semantic-ui-css/semantic.min.css';
 import { Header, Icon } from 'semantic-ui-react';
